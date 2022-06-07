@@ -1,4 +1,4 @@
-package first;
+//package first;
 
 import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
@@ -22,8 +22,9 @@ public class Env extends EnvironmentDescription {
         add(new Box(new Vector3d(-2,0,0), new Vector3f(1,1,1),this));
 
         add(new CherryAgent(new Vector3d(1,0,2),"cherry",0.1f));
-        add(new first.MyRobot(new Vector3d(0, 0, 0), "robot 1"));
+        add(new MyRobot(new Vector3d(0, 0, 0), "robot 1"));
 
+        //add(new Line(new Vector3d(2, 0, 0), 2, this));
 
         /*
         ambientLightColor = white;
