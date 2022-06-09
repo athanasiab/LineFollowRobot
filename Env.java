@@ -25,7 +25,7 @@ public class Env extends EnvironmentDescription {
         Line l2 = new Line(new Vector3d(-5, 0, 5), 1, this);
         l2.rotate90(1);
         add(l2);
-        Line l3 = new Line(new Vector3d(-7, 0, 0), 7, this);
+        Line l3 = new Line(new Vector3d(-7, 0, 0), 5, this);
         l3.rotate90(1);
         add(l3);
     }
