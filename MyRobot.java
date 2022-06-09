@@ -21,11 +21,13 @@ public class MyRobot extends Agent {
 
     }
     public void initBehavior() {
-        //setTranslationalVelocity(0.5);
+        setTranslationalVelocity(0.5);
         //setRotationalVelocity(0.3);
     }
     public void performBehavior()
     {
+        int left=0, right=0;
+        float k=0;
         if (collisionDetected()) {
             // stop the robot
             setTranslationalVelocity(0.0);
@@ -55,6 +57,19 @@ public class MyRobot extends Agent {
                         + " has hit something:"+hit);
             }
         }
+        for (int i=0;i<lineSens.getNumSensors()/2;i++)
+        {
+            left+=lineSens.hasHit(i)?1:0;
+            right+=lineSens.hasHit(lineSens.getNumSensors()-i-1)?1:0;
+            k++;
+        }
+        if (left==0 && right==0)
+        {
+            setRotationalVelocity(0);
+            setTranslationalVelocity(0);
+        }
+        else
+            this.setRotationalVelocity((left-right)/k*5);
 
     }
 }

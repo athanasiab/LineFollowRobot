@@ -11,11 +11,11 @@ public class Env extends EnvironmentDescription {
         light1IsOn = true;
         light2IsOn = false;
         light2Color = black;
-        Wall w1 = new Wall(new Vector3d(-6, 0, 0), 8, 1, this);
+        Wall w1 = new Wall(new Vector3d(-6, 0, 0), 6, 1, this);
         w1.rotate90(1);
         add(w1);
         boxColor = blue;
-        add(new Box(new Vector3d(-3,0,0), new Vector3f(1,1,1),this));
+        add(new Box(new Vector3d(-2,0,0), new Vector3f(1,1,1),this));
         add(new Box(new Vector3d(-3.5,0,5), new Vector3f(2,1,1),this));
         add(new MyRobot(new Vector3d(0, 0, 0), "robot 1"));
         Line l1 = new Line(new Vector3d(-4, 0, 0), 4, this);
