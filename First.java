@@ -1,5 +1,3 @@
-//package first;
-
 import simbad.gui.Simbad;
 
 public class First {

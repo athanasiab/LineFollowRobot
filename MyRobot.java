@@ -1,5 +1,3 @@
-// MyRobot.java
-//package first;
 import javax.vecmath.Vector3d;
 
 import simbad.sim.*;
