@@ -33,7 +33,7 @@ public class MyRobot extends Agent {
         touch1= RobotFactory.addBumperBeltSensor(this, 8);
         lineSens = RobotFactory.addLineSensor(this,11);
         sonars = RobotFactory.addSonarBeltSensor(this,12);
-        bumpers = RobotFactory.addBumperBeltSensor(this,8);
+        //bumpers = RobotFactory.addBumperBeltSensor(this,8);
 
         on_line = new boolean[8];
         rand = new Random();
@@ -46,30 +46,30 @@ public class MyRobot extends Agent {
     public void initBehavior() {
 
     }
+
     public Point3d getSensedPoint(int sonar){
         double v =radius+sonars.getMeasurement(sonar);
         double x = v*Math.cos(sonars.getSensorAngle(sonar));
         double z = v*Math.sin(sonars.getSensorAngle(sonar));
         return new Point3d(x,0,z);
     }
+
     void online(){
         int counter=0;
-        for(int i=0;i<lineSens.getNumSensors();i++){
-
+        for(int i=0; i<lineSens.getNumSensors(); i++){
             if(lineSens.hasHit(i)){
                 on_line[i]=true;
                 counter+=(i-4)<0? -1 : 1;
             }else{
                 on_line[i]=false;
             }
-
-
         }
         //this variable is true when last line sensor is on left side , false when last line sensor is on right side
         lastline=counter<=0;
         this.setRotationalVelocity(-counter*Math.PI/2);
         this.setTranslationalVelocity(0.5);
     }
+
     public void circumNavigate(){
         int min;
         min=0;
@@ -97,10 +97,9 @@ public class MyRobot extends Agent {
         //check light
 
 
-
         //check if you are on line
         boolean on=false;
-        for(int i=0;i<lineSens.getNumSensors() && !on;i++){
+        for(int i=0; i<lineSens.getNumSensors() && !on; i++){
             on=lineSens.hasHit(i);
         }
 
@@ -117,22 +116,15 @@ public class MyRobot extends Agent {
 
         // if you are not on hit mode , just follow the line
         if(!onhit  && on){
-
             look_for_line=false;
             this.online();
         }
         else if(onhit){
             onhit=true;
             circumNavigate();
-
             if(look_for_line){
-
-
                 lookForLine();
-
             }
-
-
         }
         else{
             // behavior when robot lose the line
@@ -143,10 +135,6 @@ public class MyRobot extends Agent {
             }
             this.setTranslationalVelocity(0.5);
         }
-
-
-
-
     }
 
 
@@ -158,9 +146,7 @@ public class MyRobot extends Agent {
         // check for line .
         for(int i=0;i<lineSens.getNumSensors();i++){
             if(lineSens.hasHit(i)){
-
                 this.setRotationalVelocity(2*Math.PI);
-
                 break;
             }
         }
