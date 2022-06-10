@@ -16,14 +16,14 @@ public class Env extends EnvironmentDescription {
         w1.rotate90(1);
         add(w1);
         boxColor = blue;
-        add(new Box(new Vector3d(-2,0,0), new Vector3f(1,1,1),this));
-        add(new Box(new Vector3d(-3.5,0,5), new Vector3f(2,1,1),this));
+        add(new Box(new Vector3d(-2,0,0), new Vector3f(1,1,1),this)); //box on main line
+        add(new Box(new Vector3d(-3.5,0,5), new Vector3f(2,1,1),this)); //left box
         //Creates Line
-        Line l1 = new Line(new Vector3d(-8, 0, 0), 8, this);
+        Line l1 = new Line(new Vector3d(-8, 0, 0), 8, this); //main line
         l1.rotate90(1);
         add(l1);
-        add(new Line(new Vector3d(-4, 0, 0), 5, this));
-        Line l2 = new Line(new Vector3d(-5, 0, 5), 1, this);
+        add(new Line(new Vector3d(-4, 0, 0), 5, this)); //line going to the left
+        Line l2 = new Line(new Vector3d(-5, 0, 5), 1, this); //line exiting the left box
         l2.rotate90(1);
         add(l2);
         //Line l3 = new Line(new Vector3d(-7, 0, 0), 5, this);
