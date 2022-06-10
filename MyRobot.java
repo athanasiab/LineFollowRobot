@@ -35,14 +35,15 @@ public class MyRobot extends Agent {
         sonars = RobotFactory.addSonarBeltSensor(this,12);
         //bumpers = RobotFactory.addBumperBeltSensor(this,8);
 
-        on_line = new boolean[8];
+        on_line = new boolean[11];
         rand = new Random();
         counter =0;
-        check = new Point3d[2];
+        check = new Point3d[3];
         check[0] = new Point3d(0,0,0);
         check[1] = new Point3d(0,0,6);
         lap=0;
     }
+
     public void initBehavior() {
 
     }
