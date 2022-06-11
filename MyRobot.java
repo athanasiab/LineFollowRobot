@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.Random;
 import  simbad.sim.*;
 import javax.vecmath.Vector3d;
@@ -8,11 +9,9 @@ public class MyRobot extends Agent {
     static double K1 = 5;
     static double K2 = 0.9;
     static double K3 = 3;
-    boolean onhit=false;
     boolean look_for_line=false;
     final double SAFETY =0.8;
     RangeSensorBelt sonars;
-    RangeSensorBelt bumpers;
     LightSensor lightL;
     LightSensor lightR;
     RangeSensorBelt touch1;
@@ -21,9 +20,12 @@ public class MyRobot extends Agent {
     int lap;
     Point3d check[];
     boolean on_line[];
-    int number_of_sonars;
     Random rand;
-    boolean lastline;
+
+    boolean obstacleMode=false;
+    boolean lineMode=false;
+    boolean leftLine=false;
+
     public MyRobot (Vector3d position, String name)
     {
         super(position,name);
@@ -33,6 +35,7 @@ public class MyRobot extends Agent {
         touch1= RobotFactory.addBumperBeltSensor(this, 8);
         lineSens = RobotFactory.addLineSensor(this,11);
         sonars = RobotFactory.addSonarBeltSensor(this,8);
+
         //bumpers = RobotFactory.addBumperBeltSensor(this,8);
 
         on_line = new boolean[11];
@@ -43,34 +46,86 @@ public class MyRobot extends Agent {
         check[1] = new Point3d(0,0,6);
         lap=0;
     }
-
-    public void initBehavior() {
+    public void lineHit()
+    {
+            lineMode = false;
+            for(int i=0; i<lineSens.getNumSensors() && !lineMode; i++)
+            {
+                lineMode = lineSens.hasHit(i);
+            }
 
     }
-
-    public Point3d getSensedPoint(int sonar){
-        double v =radius+sonars.getMeasurement(sonar);
-        double x = v*Math.cos(sonars.getSensorAngle(sonar));
-        double z = v*Math.sin(sonars.getSensorAngle(sonar));
-        return new Point3d(x,0,z);
-    }
-
-    void online(){
-        int counter=0;
-        for(int i=0; i<lineSens.getNumSensors(); i++){
-            if(lineSens.hasHit(i)){
-                on_line[i]=true;
-                counter+=(i-4)<0? -1 : 1;
-            }else{
-                on_line[i]=false;
+    public void sonarHit()
+    {
+        if(sonars.getFrontQuadrantHits()!=0)
+        {
+            obstacleMode = false;
+            for(int i=0; i<sonars.getNumSensors() && !obstacleMode; i++)
+            {
+                obstacleMode = sonars.hasHit(i);
             }
         }
-        //this variable is true when last line sensor is on left side , false when last line sensor is on right side
-        lastline=counter<=0;
-        this.setRotationalVelocity(-counter*Math.PI/2);
+    }
+    public void initBehavior() {
+        rotateY(Math.PI);
+    }
+    public void performBehavior()
+    {
+        if(!leftLine)
+        {
+            sonarHit();
+        }
+        if(leftLine)
+        {
+            lineHit();
+        }
+
+
+        //System.out.println("Obstacle mode:" + obstacleMode);
+        //System.out.println("Line mode:" + lineMode);
+        if(!lineMode && !obstacleMode) { //is executed when the robot found ghe end of the line and has no obstacle in front of it
+            //Robot follows the light
+            double l = lightL.getAverageLuminance();
+            double r = lightR.getAverageLuminance();
+            setRotationalVelocity(l-r);
+            setTranslationalVelocity(0.5);
+
+            //Πρέπει να σταματάει στον στόχο
+        }
+        else if(obstacleMode && lineMode && leftLine)
+        {
+            System.out.println("First If");
+            leftLine = false;
+            obstacleMode = false;
+            followLine();
+        }
+        else if(lineMode && !obstacleMode)
+        {
+            System.out.println("Second If");
+            leftLine = false;
+            followLine();
+        }
+        else if(obstacleMode)
+        {
+            System.out.println("Third If");
+            leftLine = true;
+            lineMode = false;
+            circumNavigate();
+        }
+
+    }
+    void followLine(){
+        int left=0, right=0;
+        float k=0;
+        for (int i=0;i<lineSens.getNumSensors()/2;i++)
+        {
+            left+=lineSens.hasHit(i)?1:0;
+            right+=lineSens.hasHit(lineSens.getNumSensors()-i-1)?1:0;
+            k++;
+        }
+        this.setRotationalVelocity((left-right)/k*5);
         this.setTranslationalVelocity(0.5);
     }
-
     public void circumNavigate(){
         int min;
         min=0;
@@ -92,78 +147,13 @@ public class MyRobot extends Agent {
         setTranslationalVelocity(K2*Math.cos(phRef));
     }
 
-    @Override
-    public void performBehavior()
-    {
-        //check light
-
-
-        //check if you are on line
-        boolean on=false;
-        for(int i=0; i<lineSens.getNumSensors() && !on; i++){
-            on=lineSens.hasHit(i);
-        }
-
-        //check for Hit in front of the Robot
-        if(sonars.hasHit(0) ){
-            onhit=true;
-            look_for_line=false;
-            // enable the flag look_for_line so the robot can follow the line after the obstacle
-        }else if(!sonars.hasHit(0)  && onhit){
-            look_for_line=true;
-        }
-
-
-        // if you are not on hit mode , just follow the line
-        if(!onhit  && on){
-            look_for_line=false;
-            this.online();
-        }
-        else if(onhit){
-            onhit=true;
-            circumNavigate();
-            if(look_for_line){
-                lookForLine();
-            }
-        }
-        else{
-            System.out.println("first");
-            // behavior when robot lose the line
-            if(lastline){
-                this.setRotationalVelocity(-Math.PI);
-            }else{
-                this.setRotationalVelocity(Math.PI);
-            }
-            this.setTranslationalVelocity(0.5);
-        }
+    public Point3d getSensedPoint(int sonar){
+        double v =radius+sonars.getMeasurement(sonar);
+        double x = v*Math.cos(sonars.getSensorAngle(sonar));
+        double z = v*Math.sin(sonars.getSensorAngle(sonar));
+        return new Point3d(x,0,z);
     }
-
-
-
     //this method lead the robot in correct position after it pass the obstacle
-    private void lookForLine(){
-        System.out.println("second");
-        boolean stop=false;
-        // check for line .
-        for(int i=0;i<lineSens.getNumSensors();i++){
-            if(lineSens.hasHit(i)){
-                this.setRotationalVelocity(2*Math.PI);
-                break;
-            }
-        }
-        //find min sonar from obstcle
-        int min=0;
-        for (int i=1;i<sonars.getNumSensors();i++)
-            if (sonars.getMeasurement(i)<sonars.getMeasurement(min))
-                min=i;
-        //look for line until the robot has behind it the obstacle that has already pass
-        //if min is the sonar in the back part of the robot and the robot is on the line stop looking for line
-        if((min > 2 && min < 5)){
-            onhit=false;
-            System.out.println("third");
-        }
-    }
-
     public double wrapToPi(double a)
     {
         if (a>Math.PI)

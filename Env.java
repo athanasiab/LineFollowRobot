@@ -16,21 +16,23 @@ public class Env extends EnvironmentDescription {
         w1.rotate90(1);
         add(w1);
         boxColor = blue;
-        add(new Box(new Vector3d(-2,0,0), new Vector3f(1,1,1),this)); //box on main line
-        add(new Box(new Vector3d(-3.5,0,5), new Vector3f(2,1,1),this)); //left box
+        add(new Box(new Vector3d(0,0,0), new Vector3f(1,1,1),this));
+        add(new Box(new Vector3d(-3.5,0,5), new Vector3f(2,1,1),this));
         //Creates Line
-        Line l1 = new Line(new Vector3d(-8, 0, 0), 8, this); //main line
+        Line l1 = new Line(new Vector3d(-8, 0, 0), 11, this);
         l1.rotate90(1);
         add(l1);
-        add(new Line(new Vector3d(-4, 0, 0), 5, this)); //line going to the left
-        Line l2 = new Line(new Vector3d(-5, 0, 5), 1, this); //line exiting the left box
+        add(new Line(new Vector3d(-4, 0, 0), 5, this));
+        Line l2 = new Line(new Vector3d(-7, 0, 5), 3, this);
         l2.rotate90(1);
         add(l2);
         //Line l3 = new Line(new Vector3d(-7, 0, 0), 5, this);
         //l3.rotate90(1);
         //add(l3);
         //Adds robot in center
-        add(new MyRobot(new Vector3d(0, 0, 0), "robot 1"));
+        MyRobot r = new MyRobot(new Vector3d(3, 0, 0), "robot 1");
+        add(r);
+
     }
 }
 
