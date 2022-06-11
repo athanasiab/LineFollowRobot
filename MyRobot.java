@@ -52,6 +52,9 @@ public class MyRobot extends Agent {
             for(int i=0; i<lineSens.getNumSensors() && !lineMode; i++)
             {
                 lineMode = lineSens.hasHit(i);
+                if(lineMode){
+                    break;
+                }
             }
 
     }
@@ -63,6 +66,9 @@ public class MyRobot extends Agent {
             for(int i=0; i<sonars.getNumSensors() && !obstacleMode; i++)
             {
                 obstacleMode = sonars.hasHit(i);
+                if(obstacleMode) {
+                    break;
+                }
             }
         }
     }
@@ -83,23 +89,23 @@ public class MyRobot extends Agent {
 
         //System.out.println("Obstacle mode:" + obstacleMode);
         //System.out.println("Line mode:" + lineMode);
-        if(!lineMode && !obstacleMode) { //is executed when the robot found ghe end of the line and has no obstacle in front of it
+        if(!lineMode && !obstacleMode) { //is executed when the robot found the end of the line and has no obstacle in front of it
             //Robot follows the light
             double l = lightL.getAverageLuminance();
             double r = lightR.getAverageLuminance();
-            setRotationalVelocity(l-r);
+            setRotationalVelocity(l - r);
             setTranslationalVelocity(0.5);
 
             //Πρέπει να σταματάει στον στόχο
         }
-        else if(obstacleMode && lineMode && leftLine)
+        else if(obstacleMode && lineMode && leftLine) //Finds line
         {
             System.out.println("First If");
             leftLine = false;
             obstacleMode = false;
             followLine();
         }
-        else if(lineMode && !obstacleMode)
+        else if(lineMode && !obstacleMode) //Follows the line
         {
             System.out.println("Second If");
             leftLine = false;
@@ -117,49 +123,49 @@ public class MyRobot extends Agent {
     void followLine(){
         int left=0, right=0;
         float k=0;
-        for (int i=0;i<lineSens.getNumSensors()/2;i++)
+        for (int i=0; i < lineSens.getNumSensors() / 2; i++)
         {
-            left+=lineSens.hasHit(i)?1:0;
-            right+=lineSens.hasHit(lineSens.getNumSensors()-i-1)?1:0;
+            left += lineSens.hasHit(i)?1:0;
+            right += lineSens.hasHit(lineSens.getNumSensors() - i - 1)? 1: 0;
             k++;
         }
-        this.setRotationalVelocity((left-right)/k*5);
+        this.setRotationalVelocity((left - right) / k * 5);
         this.setTranslationalVelocity(0.5);
     }
     public void circumNavigate(){
         int min;
-        min=0;
-        for (int i=1;i<sonars.getNumSensors();i++)
-            if (sonars.getMeasurement(i)<sonars.getMeasurement(min))
+        min = 0;
+        for (int i=1; i<sonars.getNumSensors(); i++)
+            if (sonars.getMeasurement(i) < sonars.getMeasurement(min))
                 min=i;
         Point3d p = getSensedPoint(min);
         double d = p.distance(new Point3d(0,0,0));
         Vector3d v;
 
-        v = CLOCKWISE? new Vector3d(-p.z,0,p.x): new Vector3d(p.z,0,-p.x);
-        double phLin = Math.atan2(v.z,v.x);
-        double phRot =Math.atan(K3*(d-SAFETY));
+        v = CLOCKWISE? new Vector3d(-p.z, 0, p.x): new Vector3d(p.z, 0, -p.x);
+        double phLin = Math.atan2(v.z, v.x);
+        double phRot =Math.atan(K3 * (d - SAFETY));
         if (CLOCKWISE)
-            phRot=-phRot;
-        double phRef = wrapToPi(phLin+phRot);
+            phRot = -phRot;
+        double phRef = wrapToPi(phLin + phRot);
 
-        setRotationalVelocity(K1*phRef);
-        setTranslationalVelocity(K2*Math.cos(phRef));
+        setRotationalVelocity(K1 * phRef);
+        setTranslationalVelocity(K2 * Math.cos(phRef));
     }
 
     public Point3d getSensedPoint(int sonar){
-        double v =radius+sonars.getMeasurement(sonar);
-        double x = v*Math.cos(sonars.getSensorAngle(sonar));
-        double z = v*Math.sin(sonars.getSensorAngle(sonar));
-        return new Point3d(x,0,z);
+        double v = radius + sonars.getMeasurement(sonar);
+        double x = v * Math.cos(sonars.getSensorAngle(sonar));
+        double z = v * Math.sin(sonars.getSensorAngle(sonar));
+        return new Point3d(x, 0, z);
     }
     //this method lead the robot in correct position after it pass the obstacle
     public double wrapToPi(double a)
     {
         if (a>Math.PI)
-            return a-Math.PI*2;
+            return a - Math.PI * 2;
         if (a<=-Math.PI)
-            return a+Math.PI*2;
+            return a + Math.PI * 2;
         return a;
     }
 }
