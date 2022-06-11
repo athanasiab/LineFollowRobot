@@ -1,5 +1,3 @@
-import java.util.Arrays;
-import java.util.Random;
 import  simbad.sim.*;
 import javax.vecmath.Vector3d;
 import javax.vecmath.Point3d;
@@ -9,21 +7,13 @@ public class MyRobot extends Agent {
     static double K1 = 5;
     static double K2 = 0.9;
     static double K3 = 3;
-    boolean look_for_line=false;
     final double SAFETY =0.8;
     RangeSensorBelt sonars;
     LightSensor lightL;
     LightSensor lightR;
-    RangeSensorBelt touch1;
     LineSensor lineSens;
-    int counter;
-    int lap;
-    Point3d[] check;
-    boolean[] on_line;
-    Random rand;
-
-    boolean obstacleMode=false; //true when obstacle has been detected
-    boolean lineMode = false; //true when on line
+    boolean obstacleMode = false; //true when obstacle has been detected
+    boolean lineMode = false; //true when on the line
     boolean leftLine = false; //true when it has left the line and moves around obstacle
 
     public MyRobot (Vector3d position, String name)
@@ -32,20 +22,11 @@ public class MyRobot extends Agent {
         //sensors
         lightL= RobotFactory.addLightSensorLeft(this);
         lightR= RobotFactory.addLightSensorRight(this);
-        touch1= RobotFactory.addBumperBeltSensor(this, 8);
         lineSens = RobotFactory.addLineSensor(this,11);
         sonars = RobotFactory.addSonarBeltSensor(this,8);
-
-        //bumpers = RobotFactory.addBumperBeltSensor(this,8);
-
-        on_line = new boolean[11];
-        rand = new Random();
-        counter =0;
-        check = new Point3d[3];
-        check[0] = new Point3d(0,0,0);
-        check[1] = new Point3d(0,0,6);
-        lap=0;
     }
+
+    //Searches for line
     public void lineHit()
     {
         //lineMode = false;
@@ -55,11 +36,23 @@ public class MyRobot extends Agent {
         }
     }
 
+    //checks if the robot reached the line's end
+    public boolean lineEnd()
+    {
+        boolean temp = false; //holds whether there was a line found
+        for (int i = 0; i < lineSens.getNumSensors() && !temp; i++) //if it detects line it turns lineMode true
+        {
+            temp = lineSens.hasHit(i);
+        }
+        return !temp && !obstacleMode;
+    }
+
+    //Searches for obstacle
     public void sonarHit()
     {
+        obstacleMode = false;
         if(sonars.getFrontQuadrantHits()!=0) //if the front sonars detect obstacle
         {
-            obstacleMode = true;
             for(int i=0; i < sonars.getNumSensors() && !obstacleMode; i++) //if a sonar detects obstacle obstacleMode turns true
             {
                 obstacleMode = sonars.hasHit(i);
@@ -76,12 +69,14 @@ public class MyRobot extends Agent {
         {
             sonarHit();
         }
-        if(obstacleMode) //if it has found obstacle, it checks for line
+        if(obstacleMode || !leftLine) //if it has found obstacle or at the beginning, it checks for line
         {
             lineHit();
         }
 
-        if(!lineMode && !obstacleMode) { //is executed when the robot found the end of the line and has no obstacle in front of it
+
+
+        if(lineEnd()) { //is executed when the robot found the end of the line and has no obstacle in front of it
             //Robot follows the light
             double l = lightL.getAverageLuminance();
             double r = lightR.getAverageLuminance();
@@ -90,20 +85,21 @@ public class MyRobot extends Agent {
 
             //Πρέπει να σταματάει στον στόχο
         }
-        else if(obstacleMode && lineMode && leftLine) //Finds line
+        else if(lineMode && leftLine) //Finds line
         {
             System.out.println("First If");
             leftLine = false;
             obstacleMode = false;
             followLine();
         }
-        else if(lineMode && !obstacleMode) //Follows the line
+        else if(lineMode) //Follows the line
         {
             System.out.println("Second If");
             leftLine = false;
+            //lineHit(); //checks if the line still exists
             followLine();
         }
-        else if(obstacleMode) //Finds obstacle
+        if(obstacleMode) //Found obstacle
         {
             System.out.println("Third If");
             leftLine = true;
@@ -124,6 +120,7 @@ public class MyRobot extends Agent {
         this.setRotationalVelocity((left - right) / k * 5);
         this.setTranslationalVelocity(0.5);
     }
+
     public void circumNavigate(){
         int min;
         min = 0;
@@ -152,6 +149,7 @@ public class MyRobot extends Agent {
         return new Point3d(x, 0, z);
     }
     //this method lead the robot in correct position after it pass the obstacle
+
     public double wrapToPi(double a)
     {
         if (a>Math.PI)
