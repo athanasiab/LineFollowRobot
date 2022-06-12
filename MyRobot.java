@@ -9,6 +9,7 @@ public class MyRobot extends Agent {
     static double K1 = 5;
     static double K2 = 0.9;
     static double K3 = 3;
+
     boolean look_for_line=false;
     final double SAFETY =0.8;
     RangeSensorBelt sonars;
@@ -21,10 +22,14 @@ public class MyRobot extends Agent {
     Point3d check[];
     boolean on_line[];
     Random rand;
-
+    boolean foundline = false;
     boolean obstacleMode=false;
     boolean lineMode=false;
     boolean leftLine=false;
+
+    boolean hasHitLine, isHasHitSonar, isHasHitLight = false;
+    boolean onavoidmode;
+
 
     public MyRobot (Vector3d position, String name)
     {
@@ -51,49 +56,153 @@ public class MyRobot extends Agent {
             lineMode = false;
             for(int i=0; i<lineSens.getNumSensors() && !lineMode; i++)
             {
-                lineMode = lineSens.hasHit(i);
+                if(lineSens.hasHit(i))
+                {
+                    lineMode =true;
+                    if(obstacleMode)
+                        obstacleMode=false;
+                    break;
+                }
             }
 
     }
     public void sonarHit()
     {
+        obstacleMode = false;
         if(sonars.getFrontQuadrantHits()!=0)
         {
-            obstacleMode = false;
-            for(int i=0; i<sonars.getNumSensors() && !obstacleMode; i++)
-            {
-                obstacleMode = sonars.hasHit(i);
-            }
+            obstacleMode = true;
+
         }
     }
     public void initBehavior() {
         rotateY(Math.PI);
     }
+    public boolean lineEnd()
+    {
+        boolean temp = false; //holds whether there was a line found
+        for (int i = 0; i < lineSens.getNumSensors() && !temp; i++) //if it detects line it turns lineMode true
+        {
+            temp = lineSens.hasHit(i);
+        }
+        return !temp && !obstacleMode;
+    }
     public void performBehavior()
     {
+
+       boolean tempHasHitLine = false;
+       boolean tempisHasHitSonar = false;
+       boolean tempisHasHitLight = false;
+       double l = lightL.getAverageLuminance();
+       double r = lightR.getAverageLuminance();
+
+        for(int i=0; i<lineSens.getNumSensors(); i++)
+        {
+            if(lineSens.hasHit(i))
+            {
+                tempHasHitLine = true;
+                System.out.println("HIT");
+                break;
+            }
+        }
+       if(sonars.getFrontQuadrantHits()!=0)
+       {
+           tempisHasHitSonar = true;
+       }
+       if(l > 0 && r > 0)
+       {
+           tempisHasHitLight = true;
+       }
+
+        if((!onavoidmode && !tempHasHitLine) || isHasHitLight)
+        {
+            System.out.println("FIRST IF");
+            isHasHitLight = true;
+            isHasHitSonar = false;
+            hasHitLine = false;
+            followLight();
+        }
+        else if ((isHasHitSonar && tempHasHitLine && !hasHitLine) || (tempHasHitLine && !tempisHasHitSonar)) {
+           //System.out.println("SECOND IF");
+           followLine();
+           isHasHitSonar = false;
+           hasHitLine = true;
+           onavoidmode = false;
+       }
+        else
+        {
+            System.out.println("THIRD IF");
+            hasHitLine = false;
+            isHasHitSonar = true;
+            onavoidmode = true;
+            circumNavigate();
+        }
+      /*  if (lineEnd() || isHasHitLight)
+        {
+            hasHitLine = false;
+            isHasHitSonar = false;
+            isHasHitLight = true;
+            followLight();
+        }
+        else if (hasHitLine && tempisHasHitSonar)
+        {
+            circumNavigate();
+            hasHitLine = false;
+            isHasHitSonar = true;
+            isHasHitLight = false;
+        }
+        else if (isHasHitSonar && tempisHasHitSonar)
+        {
+            circumNavigate();
+            hasHitLine = false;
+            isHasHitSonar = true;
+            isHasHitLight = false;
+        }
+        else if (isHasHitSonar && tempHasHitLine)
+        {
+            followLine();
+            hasHitLine = true;
+            isHasHitSonar = false;
+            isHasHitLight = false;
+        }
+        else if(hasHitLine && tempHasHitLine && !isHasHitLight) {
+            {
+                followLine();
+                hasHitLine = true;
+                isHasHitSonar = false;
+                isHasHitLight = false;
+            }
+        }
+        else
+        {
+            {
+                followLine();
+                hasHitLine = true;
+                isHasHitSonar = false;
+                isHasHitLight = false;
+            }
+        }
+
+
+       /* if(leftLine)
+        {
+            lineHit();
+        }
         if(!leftLine)
         {
             sonarHit();
         }
-        if(leftLine)
-        {
-            lineHit();
-        }
+
 
 
         //System.out.println("Obstacle mode:" + obstacleMode);
         //System.out.println("Line mode:" + lineMode);
-        if(!lineMode && !obstacleMode) { //is executed when the robot found ghe end of the line and has no obstacle in front of it
-            //Robot follows the light
-            double l = lightL.getAverageLuminance();
-            double r = lightR.getAverageLuminance();
-            setRotationalVelocity(l-r);
-            setTranslationalVelocity(0.5);
-
-            //Πρέπει να σταματάει στον στόχο
+        if(!lineMode && !obstacleMode && !foundline) { //is executed when the robot found ghe end of the line and has no obstacle in front of it
+            followLight();
         }
         else if(obstacleMode && lineMode && leftLine)
         {
+            foundline = true;
             System.out.println("First If");
             leftLine = false;
             obstacleMode = false;
@@ -108,11 +217,20 @@ public class MyRobot extends Agent {
         else if(obstacleMode)
         {
             System.out.println("Third If");
+            foundline = false;
             leftLine = true;
             lineMode = false;
             circumNavigate();
-        }
+        }*/
 
+    }
+    void followLight()
+    {
+        //Robot follows the light
+        double l = lightL.getAverageLuminance();
+        double r = lightR.getAverageLuminance();
+        setRotationalVelocity(l-r);
+        setTranslationalVelocity(0.5);
     }
     void followLine(){
         int left=0, right=0;
@@ -123,8 +241,8 @@ public class MyRobot extends Agent {
             right+=lineSens.hasHit(lineSens.getNumSensors()-i-1)?1:0;
             k++;
         }
-        this.setRotationalVelocity((left-right)/k*5);
-        this.setTranslationalVelocity(0.5);
+        this.setRotationalVelocity((left-right)/k*10);
+        this.setTranslationalVelocity(0.2);
     }
     public void circumNavigate(){
         int min;
