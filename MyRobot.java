@@ -77,6 +77,7 @@ public class MyRobot extends Agent {
                 }
             } else if ((onAvoidMode && tempHasHitLine && !hasHitLine) || (tempHasHitLine && !tempisHasHitSonar && !onAvoidMode)) {
                 //Was on obstacle avoidance mode and has found line but hasn't followed it
+                //or is following line
                 System.out.println("Follows the line");
                 isHasHitSonar = false;
                 hasHitLine = true;
