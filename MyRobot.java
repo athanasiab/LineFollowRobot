@@ -47,7 +47,7 @@ public class MyRobot extends Agent {
         lap=0;
     }
     public void initBehavior() {
-        rotateY(Math.PI);
+        //rotateY(Math.PI);
     }
     public void performBehavior()
     {
@@ -67,6 +67,20 @@ public class MyRobot extends Agent {
             }
 
             if ((!onavoidmode && !tempHasHitLine) || isHasHitLight) {
+                if(tempHasHitLine)
+                {
+                    isHasHitLight = false;
+                    isHasHitSonar = false;
+                    hasHitLine = true;
+                    onavoidmode = false;
+                    followLine();
+                } else if (tempisHasHitSonar) {
+                    isHasHitLight = false;
+                    hasHitLine = false;
+                    isHasHitSonar = true;
+                    onavoidmode = true;
+                    circumNavigate();
+                }
                 System.out.println("FIRST IF");
                 isHasHitLight = true;
                 isHasHitSonar = false;
@@ -86,91 +100,6 @@ public class MyRobot extends Agent {
                 circumNavigate();
             }
         }
-      /*  if (lineEnd() || isHasHitLight)
-        {
-            hasHitLine = false;
-            isHasHitSonar = false;
-            isHasHitLight = true;
-            followLight();
-        }
-        else if (hasHitLine && tempisHasHitSonar)
-        {
-            circumNavigate();
-            hasHitLine = false;
-            isHasHitSonar = true;
-            isHasHitLight = false;
-        }
-        else if (isHasHitSonar && tempisHasHitSonar)
-        {
-            circumNavigate();
-            hasHitLine = false;
-            isHasHitSonar = true;
-            isHasHitLight = false;
-        }
-        else if (isHasHitSonar && tempHasHitLine)
-        {
-            followLine();
-            hasHitLine = true;
-            isHasHitSonar = false;
-            isHasHitLight = false;
-        }
-        else if(hasHitLine && tempHasHitLine && !isHasHitLight) {
-            {
-                followLine();
-                hasHitLine = true;
-                isHasHitSonar = false;
-                isHasHitLight = false;
-            }
-        }
-        else
-        {
-            {
-                followLine();
-                hasHitLine = true;
-                isHasHitSonar = false;
-                isHasHitLight = false;
-            }
-        }
-
-
-       /* if(leftLine)
-        {
-            lineHit();
-        }
-        if(!leftLine)
-        {
-            sonarHit();
-        }
-
-
-
-        //System.out.println("Obstacle mode:" + obstacleMode);
-        //System.out.println("Line mode:" + lineMode);
-        if(!lineMode && !obstacleMode && !foundline) { //is executed when the robot found ghe end of the line and has no obstacle in front of it
-            followLight();
-        }
-        else if(obstacleMode && lineMode && leftLine)
-        {
-            foundline = true;
-            System.out.println("First If");
-            leftLine = false;
-            obstacleMode = false;
-            followLine();
-        }
-        else if(lineMode && !obstacleMode)
-        {
-            System.out.println("Second If");
-            leftLine = false;
-            followLine();
-        }
-        else if(obstacleMode)
-        {
-            System.out.println("Third If");
-            foundline = false;
-            leftLine = true;
-            lineMode = false;
-            circumNavigate();
-        }*/
 
     }
     void followLight()
@@ -178,7 +107,7 @@ public class MyRobot extends Agent {
         //Robot follows the light
         double l = lightL.getAverageLuminance();
         double r = lightR.getAverageLuminance();
-        if(l <= 0.25 || r <= 0.22)
+        if(l <= 0.22 || r <= 0.22)
         {
             setRotationalVelocity(0);
             setTranslationalVelocity(0);
@@ -186,7 +115,7 @@ public class MyRobot extends Agent {
             return;
         }
         setRotationalVelocity(l-r);
-        setTranslationalVelocity(0.5);
+        setTranslationalVelocity(0.2);
 
     }
     void followLine(){
@@ -197,6 +126,9 @@ public class MyRobot extends Agent {
             left+=lineSens.hasHit(i)?1:0;
             right+=lineSens.hasHit(lineSens.getNumSensors()-i-1)?1:0;
             k++;
+        }
+        if(left==right) {
+            left += 2;
         }
         this.setRotationalVelocity((left-right)/k*5);
         this.setTranslationalVelocity(0.2);
