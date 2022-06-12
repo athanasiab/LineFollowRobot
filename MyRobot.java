@@ -55,12 +55,29 @@ public class MyRobot extends Agent {
             if ((!onAvoidMode && !tempHasHitLine) || isHasHitLight) {
                 System.out.println("Follows light");
                 //if it doesn't find line or doesn't see obstacle it follows the light
-                isHasHitLight = true; //continues to only follow the light
-                isHasHitSonar = false;
-                hasHitLine = false;
-                followLight();
+                if(tempHasHitLine)
+                {
+                    isHasHitLight = false;
+                    isHasHitSonar = false;
+                    hasHitLine = true;
+                    onAvoidMode = false;
+                    followLine();
+                } else if (tempisHasHitSonar) {
+                    isHasHitLight = false;
+                    hasHitLine = false;
+                    isHasHitSonar = true;
+                    onAvoidMode = true;
+                    circumNavigate();
+                }else{
+                    System.out.println("FIRST IF");
+                    isHasHitLight = true;
+                    isHasHitSonar = false;
+                    hasHitLine = false;
+                    followLight();
+                }
             } else if ((onAvoidMode && tempHasHitLine && !hasHitLine) || (tempHasHitLine && !tempisHasHitSonar && !onAvoidMode)) {
                 //Was on obstacle avoidance mode and has found line but hasn't followed it
+                //or is following line
                 System.out.println("Follows the line");
                 isHasHitSonar = false;
                 hasHitLine = true;
@@ -129,7 +146,7 @@ public class MyRobot extends Agent {
         double phRef = wrapToPi(phLin + phRot);
 
         setRotationalVelocity(K1 * phRef);
-        setTranslationalVelocity(K2 * Math.cos(phRef));
+        setTranslationalVelocity(K2 * Math.cos(phRef)/2);
     }
 
     public Point3d getSensedPoint(int sonar){
