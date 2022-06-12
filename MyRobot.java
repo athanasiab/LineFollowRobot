@@ -80,12 +80,13 @@ public class MyRobot extends Agent {
                     isHasHitSonar = true;
                     onavoidmode = true;
                     circumNavigate();
+                }else{
+                    System.out.println("FIRST IF");
+                    isHasHitLight = true;
+                    isHasHitSonar = false;
+                    hasHitLine = false;
+                    followLight();
                 }
-                System.out.println("FIRST IF");
-                isHasHitLight = true;
-                isHasHitSonar = false;
-                hasHitLine = false;
-                followLight();
             } else if ((onavoidmode && tempHasHitLine && !hasHitLine) || (tempHasHitLine && !tempisHasHitSonar && !onavoidmode)) {
                 System.out.println("SECOND IF");
                 isHasHitSonar = false;
@@ -151,7 +152,7 @@ public class MyRobot extends Agent {
         double phRef = wrapToPi(phLin+phRot);
 
         setRotationalVelocity(K1*phRef);
-        setTranslationalVelocity(K2*Math.cos(phRef));
+        setTranslationalVelocity(K2*Math.cos(phRef)/2);
     }
 
     public Point3d getSensedPoint(int sonar){
