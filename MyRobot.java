@@ -1,4 +1,3 @@
-import java.util.Arrays;
 import java.util.Random;
 import  simbad.sim.*;
 import javax.vecmath.Vector3d;
@@ -18,8 +17,8 @@ public class MyRobot extends Agent {
     LineSensor lineSens;
     int counter;
     int lap;
-    Point3d check[];
-    boolean on_line[];
+    Point3d[] check;
+    boolean[] on_line;
     Random rand;
     boolean goal = false;
     boolean hasHitLine, isHasHitSonar, isHasHitLight = false;
@@ -35,8 +34,6 @@ public class MyRobot extends Agent {
         touch1= RobotFactory.addBumperBeltSensor(this, 8);
         lineSens = RobotFactory.addLineSensor(this,11);
         sonars = RobotFactory.addSonarBeltSensor(this,8);
-
-        //bumpers = RobotFactory.addBumperBeltSensor(this,8);
 
         on_line = new boolean[11];
         rand = new Random();
